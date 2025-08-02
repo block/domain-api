@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package xyz.block.domainapi.util
 
 import app.cash.kfsm.guice.StateMachine
@@ -8,14 +6,11 @@ import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.junit.platform.runner.JUnitPlatform
-import org.junit.runner.RunWith
 import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.DomainApiError
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.ResultCode
 
-@RunWith(JUnitPlatform::class)
 class ControllerTest {
   private val injector = Guice.createInjector(TestModule())
   private val stateMachine =

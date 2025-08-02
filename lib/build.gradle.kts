@@ -20,17 +20,18 @@ mavenPublishing {
 }
 
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
-  implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+  implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation(libs.arrow)
   implementation(libs.jooq)
   implementation(libs.kfsm)
   implementation(libs.kfsmGuice)
   implementation(libs.quiver)
+  implementation(libs.guice)
 
   // Test dependencies
-  testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-  testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
-  testImplementation("io.kotest:kotest-property:5.8.0")
-  testImplementation("io.mockk:mockk:1.13.10")
+  testImplementation(libs.bundles.kotest)
+  testImplementation(libs.mockk)
+  testImplementation(libs.junitApi)
+  testImplementation(libs.junitEngine)
 }
