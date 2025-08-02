@@ -1,0 +1,64 @@
+# Project Information
+project:
+  name: domain-api
+  package: xyz.block.domainapi
+  language: kotlin
+  description: Framework for implementing domain-driven APIs that separate business logic from presentation concerns
+
+# Development Environment
+environment:
+  - Uses hermit for tool management (no gradlew)
+  - Run `. bin/activate-hermit` to set up environment
+  - Primary build tool is gradle (not gradlew)
+
+# Project Structure
+directories:
+  source: src/main/kotlin
+  tests: src/test/kotlin
+  package_base: xyz.block.domainapi
+
+# Code Style & Conventions
+kotlin:
+  - All code under bitty-lib must be in Kotlin
+  - Prefer functional style using Arrow and Quiver
+  - Use Kotlin's Result type for error handling (not Either)
+  - Use Kotlin nullable types (not Option)
+  - Never use IO type
+  - Use property access syntax instead of getters/setters
+  - No wildcard imports allowed
+  - All files must end with a newline
+  - Define all magic numbers as constants
+
+# Error Handling
+error_handling:
+  - Use Kotlin's Result type for error cases
+  - Leverage Arrow and Quiver extension methods for Result
+  - In tests, use getOrThrow() instead of shouldBeSuccess() for better stack traces
+
+# Testing
+testing:
+  framework:
+    - JUnit 5 only (no JUnit 4 imports allowed)
+    - Use kotest matchers for all assertions
+    - Prefer sociable testing over mocks
+  data:
+    - Prefer Arb<T> values over literals
+    - Collect project-specific Arb<T> values in test-scoped Arbitrary class
+  fakes:
+    - Implement unneeded methods with error("Not yet implemented")
+  commands:
+    - Run tests with `bin/gradle check`
+
+# Build Process
+build:
+  - Use `bin/gradle check` for testing
+  - Use `bin/gradle build` for building
+  - For API compatibility validation, use Kotlin Binary Compatibility Validator plugin
+  - Update README.md when making significant changes
+
+# Dependencies
+key_dependencies:
+  - Arrow (for functional programming utilities)
+  - Quiver (for additional functional extensions)
+  - Kotest (for assertions)
+  - JUnit 5 (for testing framework)
