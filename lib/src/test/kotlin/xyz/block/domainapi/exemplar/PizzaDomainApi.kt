@@ -59,16 +59,16 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
    */
   override fun execute(
     id: String,
-    hurdleResults: List<HurdleResponse<RequirementId>>,
-  ): Result<ExecuteResponse<String, RequirementId>> = result { doExecute(id, hurdleResults, false).bind() }
+    hurdleResponses: List<HurdleResponse<RequirementId>>,
+  ): Result<ExecuteResponse<String, RequirementId>> = result { doExecute(id, hurdleResponses, false).bind() }
 
   private fun doExecute(
     id: String,
-    hurdleResults: List<HurdleResponse<RequirementId>>,
+    hurdleResponses: List<HurdleResponse<RequirementId>>,
     allowUpdate: Boolean,
   ): Result<ExecuteResponse<String, RequirementId>> = result {
     val pizzaOrder = pizzaOrdersMap[id].toOption().toEither { DomainApiError.ProcessNotFound(id) }.bind()
-    hurdleResults
+    hurdleResponses
       .fold(Result.success(PizzaOrderAndHurdles(pizzaOrder, emptyList()))) {
         accumulator: Result<PizzaOrderAndHurdles>,
         hurdleResult ->
@@ -126,9 +126,9 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
   override fun update(
     id: String,
     attributeId: AttributeId,
-    hurdleResults: List<HurdleResponse<RequirementId>>,
+    hurdleResponses: List<HurdleResponse<RequirementId>>,
   ): Result<UpdateResponse<RequirementId, AttributeId>> = result {
-    if (hurdleResults.isEmpty()) {
+    if (hurdleResponses.isEmpty()) {
       // No hurdle results submitted - this is the first call
       when (attributeId) {
         AttributeId.DELIVERY_SPEED -> UpdateResponse(id, attributeId, listOf(DeliverySpeedHurdle()))
@@ -141,7 +141,7 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
             PizzaOrderState.ORDERING,
             PizzaOrderState.MAKING,
             PizzaOrderState.READY_FOR_DELIVERY ->
-              doExecute(id, hurdleResults, true).map { UpdateResponse(id, attributeId, it.interactions) }.bind()
+              doExecute(id, hurdleResponses, true).map { UpdateResponse(id, attributeId, it.interactions) }.bind()
             else ->
               raise(
                 DomainApiError.CannotUpdateProcess(

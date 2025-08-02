@@ -1,12 +1,12 @@
 [versions]
 arrow = "2.1.2"
 guice = "7.0.0"
-jooq = "3.20.5"
+jooq = "3.16.15"
 junit = "5.10.1"
 kfsm = "0.10.3.8"
 kotest = "5.8.0"
 # @pin
-kotlin = "1.9.20"
+kotlin = "2.1.20"
 kotlinBinaryCompatibilityPlugin = "0.13.2"
 kotlinLogging = "3.0.5"
 mockk = "1.13.10"
