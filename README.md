@@ -84,4 +84,4 @@ Errors should be returned as a `Result.failure`. Several generic error types are
 
 ## Implementation
 
-There is a simple [exemplar](../exemplar) app that shows how to implement this style of domain API.
+There is a simple [exemplar](src/test/kotlin/xyz/block/domainapi/exemplar/) app that shows how to implement this style of domain API.
