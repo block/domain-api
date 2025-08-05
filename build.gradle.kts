@@ -14,9 +14,9 @@ plugins {
 subprojects {
   apply(plugin = "org.jetbrains.dokka")
 
-  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = "11"
+  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
   }
   
@@ -48,7 +48,7 @@ tasks.dokkaHtmlMultiModule {
   moduleVersion.set(project.version.toString())
 }
 
-task("publishToMavenCentral") {
+tasks.register("publishToMavenCentral") {
   group = "publishing"
   dependsOn(
     ":lib:publishToMavenCentral",
