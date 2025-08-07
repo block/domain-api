@@ -1,21 +1,21 @@
 [versions]
 arrow = "2.1.2"
 guice = "7.0.0"
-jooq = "3.16.15"
-junit = "5.10.1"
+jooq = "3.20.5"
+junit = "[5.0,6.0)"
 kfsm = "0.10.3.8"
-kotest = "5.8.0"
+kotest = "6.0.0.M10"
 # @pin
 kotlin = "2.1.20"
-kotlinBinaryCompatibilityPlugin = "0.13.2"
+kotlinBinaryCompatibilityPlugin = "0.18.1"
 kotlinLogging = "3.0.5"
-mockk = "1.13.10"
+mockk = "1.14.5"
 quiver = "1.0.0"
 reflections = "0.10.2"
 slf4j = "2.0.11"
-versionCatalogUpdateGradlePlugin = "0.8.3"
-versionsGradlePlugin = "0.50.0"
-mavenPublish = "0.33.0"
+versionCatalogUpdateGradlePlugin = "1.0.0"
+versionsGradlePlugin = "0.52.0"
+mavenPublish = "0.34.0"
 
 [libraries]
 arrow = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -44,7 +44,7 @@ kotest = [
 ]
 
 [plugins]
-dokka = "org.jetbrains.dokka:1.9.10"
+dokka = "org.jetbrains.dokka:2.0.0"
 gradleDocker = "com.bmuschko.docker-remote-api:9.4.0"
 kotlinBinaryCompatibilityPlugin = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "kotlinBinaryCompatibilityPlugin" }
 kotlinGradlePlugin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
