@@ -1,24 +1,23 @@
 package xyz.block.domainapi.util
 
-import app.cash.kfsm.guice.StateMachine
+import app.cash.kfsm.StateMachine
 import app.cash.quiver.extensions.success
 import arrow.core.raise.result
 import org.jooq.DSLContext
-import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.Input
 
 class TestController(stateMachine: StateMachine<String, TestValue, TestState>) :
   InfoCollectionController<String, TestState, TestValue, TestRequirement>(
-    pendingCollectionState = TestState.Initial,
+    pendingCollectionState = Initial,
     stateMachine = stateMachine,
   ) {
 
   override fun findMissingRequirements(value: TestValue) =
     when (value.state) {
-      is TestState.Initial -> listOf(TestRequirement.REQ1, TestRequirement.REQ2).success()
-      is TestState.Processing -> emptyList<TestRequirement>().success()
-      is TestState.Complete -> emptyList<TestRequirement>().success()
-      TestState.Final -> emptyList<TestRequirement>().success()
+      is Initial -> listOf(TestRequirement.REQ1, TestRequirement.REQ2).success()
+      is Processing -> emptyList<TestRequirement>().success()
+      is Complete -> emptyList<TestRequirement>().success()
+      Final -> emptyList<TestRequirement>().success()
     }
 
   override fun updateValue(
@@ -39,9 +38,9 @@ class TestController(stateMachine: StateMachine<String, TestValue, TestState>) :
 
   override fun transition(value: TestValue): Result<TestValue> = result {
     when (value.state) {
-      is TestState.Initial -> {
-        val updatedValue = stateMachine.transitionToState(value, TestState.Processing).bind()
-        stateMachine.transitionToState(updatedValue, TestState.Complete).bind()
+      is Initial -> {
+        val updatedValue = stateMachine.transitionTo(value, Processing).bind()
+        stateMachine.transitionTo(updatedValue, Complete).bind()
       }
       else -> raise(IllegalStateException("Invalid state ${value.state}"))
     }

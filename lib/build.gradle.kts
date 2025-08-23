@@ -25,9 +25,7 @@ dependencies {
   implementation(libs.arrow)
   implementation(libs.jooq)
   implementation(libs.kfsm)
-  implementation(libs.kfsmGuice)
   implementation(libs.quiver)
-  implementation(libs.guice)
 
   // Test dependencies
   testImplementation(libs.bundles.kotest)

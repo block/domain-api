@@ -1,9 +1,5 @@
 package xyz.block.domainapi.util
 
-import app.cash.kfsm.guice.StateMachine
-import com.google.inject.Guice
-import com.google.inject.Key
-import com.google.inject.TypeLiteral
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import xyz.block.domainapi.DomainApi
@@ -12,14 +8,10 @@ import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.ResultCode
 
 class ControllerTest {
-  private val injector = Guice.createInjector(TestModule())
-  private val stateMachine =
-    injector.getInstance(Key.get(object : TypeLiteral<StateMachine<String, TestValue, TestState>>() {}))
-
   @Test
   fun `should fail when value is in wrong state`() {
     val controller = TestController(stateMachine)
-    val value = TestValue("test", TestState.Complete)
+    val value = TestValue("test", Complete)
 
     val result = controller.process(value, emptyList())
 
@@ -30,7 +22,7 @@ class ControllerTest {
   @Test
   fun `should return hurdles when requirements are missing`() {
     val controller = TestController(stateMachine)
-    val value = TestValue("test", TestState.Initial)
+    val value = TestValue("test", Initial)
 
     val result = controller.process(value, emptyList())
 
@@ -44,26 +36,26 @@ class ControllerTest {
   @Test
   fun `should complete when all requirements are met`() {
     val controller = TestController(stateMachine)
-    val value = TestValue("test", TestState.Initial)
+    val value = TestValue("test", Initial)
 
     val result =
       controller.process(
         value,
         listOf(
           TestRequirementResult(TestRequirement.REQ1, ResultCode.CLEARED),
-          TestRequirementResult(TestRequirement.REQ2, ResultCode.CLEARED),
-        ),
+          TestRequirementResult(TestRequirement.REQ2, ResultCode.CLEARED)
+        )
       )
 
     val processingState = result.getOrThrow() as ProcessingState.Complete<TestValue, TestRequirement>
-    processingState.value.state shouldBe TestState.Complete
+    processingState.value.state shouldBe Complete
     processingState.value.data shouldBe "Req2"
   }
 
   @Test
   fun `should handle cancelled requirement result`() {
     val controller = TestController(stateMachine)
-    val value = TestValue("test", TestState.Initial)
+    val value = TestValue("test", Initial)
     val requirementResult = TestRequirementResult(TestRequirement.REQ1, ResultCode.CANCELLED)
 
     val result = controller.process(value, listOf(requirementResult))
@@ -74,19 +66,19 @@ class ControllerTest {
   @Test
   fun `should update value when requirement result is processed`() {
     val controller = TestController(stateMachine)
-    val value = TestValue("test", TestState.Initial)
+    val value = TestValue("test", Initial)
 
     val result =
       controller.process(
         value,
         listOf(
           TestRequirementResult(TestRequirement.REQ1, ResultCode.CLEARED),
-          TestRequirementResult(TestRequirement.REQ2, ResultCode.CLEARED),
-        ),
+          TestRequirementResult(TestRequirement.REQ2, ResultCode.CLEARED)
+        )
       )
 
     val processingState = result.getOrThrow() as ProcessingState.Complete<TestValue, TestRequirement>
-    processingState.value.state shouldBe TestState.Complete
+    processingState.value.state shouldBe Complete
     processingState.value.data shouldBe "Req2"
   }
 }

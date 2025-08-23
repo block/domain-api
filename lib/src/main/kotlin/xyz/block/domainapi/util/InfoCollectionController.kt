@@ -2,7 +2,7 @@ package xyz.block.domainapi.util
 
 import app.cash.kfsm.State
 import app.cash.kfsm.Value
-import app.cash.kfsm.guice.StateMachine
+import app.cash.kfsm.StateMachine
 import app.cash.quiver.extensions.success
 import arrow.core.raise.result
 import org.jooq.DSLContext
