@@ -1,46 +1,48 @@
 package xyz.block.domainapi.util
 
 import app.cash.kfsm.State
-import app.cash.kfsm.States
-import app.cash.kfsm.Transition
-import app.cash.kfsm.Transitioner
 import app.cash.kfsm.Value
-import app.cash.kfsm.guice.annotations.TransitionDefinition
-import app.cash.kfsm.guice.annotations.TransitionerDefinition
+import app.cash.kfsm.fsm
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ResultCode
 import xyz.block.domainapi.UserInteraction
 
-@TransitionDefinition
-class IsProcessing : Transition<String, TestValue, TestState>(States(TestState.Initial), TestState.Processing)
+sealed class TestState(
+  to: () -> Set<TestState>
+) : State<String, TestValue, TestState>(to)
 
-@TransitionDefinition
-class IsComplete : Transition<String, TestValue, TestState>(States(TestState.Processing), TestState.Complete)
+data object Initial : TestState({ setOf(Processing) })
 
-@TransitionDefinition
-class IsFinal : Transition<String, TestValue, TestState>(States(TestState.Complete), TestState.Final)
+data object Processing : TestState({ setOf(Complete) })
 
-@TransitionerDefinition
-class TestTransitioner : Transitioner<String, Transition<String, TestValue, TestState>, TestValue, TestState>()
+data object Complete : TestState({ setOf(Final) })
 
-sealed class TestState(to: () -> Set<TestState>) : State<String, TestValue, TestState>(to) {
-  data object Initial : TestState({ setOf(Processing) })
+data object Final : TestState({ emptySet() })
 
-  data object Processing : TestState({ setOf(Complete) })
-
-  data object Complete : TestState({ setOf(Final) })
-
-  data object Final : TestState({ emptySet() })
-}
-
-data class TestValue(override val id: String, override val state: TestState, val data: String = "") :
-  Value<String, TestValue, TestState> {
+data class TestValue(
+  override val id: String,
+  override val state: TestState,
+  val data: String = ""
+) : Value<String, TestValue, TestState> {
   override fun update(newState: TestState): TestValue = copy(state = newState)
 }
 
+val stateMachine =
+  fsm<String, TestValue, TestState> {
+    Initial becomes {
+      Processing via { it }
+    }
+    Processing becomes {
+      Complete via { it }
+    }
+    Complete becomes {
+      Final via { it }
+    }
+  }.getOrThrow()
+
 enum class TestRequirement {
   REQ1,
-  REQ2,
+  REQ2
 }
 
 data class TestHurdle(
@@ -52,10 +54,10 @@ data class TestHurdle(
     return requirement == other.requirement
   }
 
-  override fun hashCode(): Int {
-    return requirement.hashCode()
-  }
+  override fun hashCode(): Int = requirement.hashCode()
 }
 
-class TestRequirementResult(id: TestRequirement, resultCode: ResultCode) :
-  Input.HurdleResponse<TestRequirement>(id, resultCode)
+class TestRequirementResult(
+  id: TestRequirement,
+  resultCode: ResultCode
+) : Input.HurdleResponse<TestRequirement>(id, resultCode)

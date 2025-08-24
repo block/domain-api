@@ -2,7 +2,7 @@ package xyz.block.domainapi.util
 
 import app.cash.kfsm.State
 import app.cash.kfsm.Value
-import app.cash.kfsm.guice.StateMachine
+import app.cash.kfsm.StateMachine
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
 
