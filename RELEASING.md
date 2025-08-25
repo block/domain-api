@@ -2,7 +2,7 @@
 
 ## Overview
 
-kFSM uses automated publishing to Maven Central via GitHub Actions. The release process is triggered by creating a tag in semver format (e.g., `v0.10.4`) on the main branch.
+Domain-api uses automated publishing to Maven Central via GitHub Actions. The release process is triggered by creating a tag in semver format (e.g., `v0.10.4`) on the main branch.
 
 ## Prerequisites
 
@@ -76,11 +76,11 @@ Once the release PR is merged to main:
 
 ### 3. Automated Publishing
 
-Once the tag is pushed, the [Publish to Maven Central](https://github.com/cashapp/kfsm/actions/workflows/publish.yml) workflow will automatically:
+Once the tag is pushed, the [Publish to Maven Central](https://github.com/block/domain-api/actions/workflows/publish.yml) workflow will automatically:
 
 1. Build both artifacts:
-   - `app.cash.kfsm:kfsm:$version` (core library)
-   - `app.cash.kfsm:kfsm-guice:$version` (Guice integration)
+   - `xyz.block.domainapi:kfsm:$version` (core library)
+   - `xyz.block.domainapi:kfsm-guice:$version` (Guice integration)
 
 2. Sign the artifacts with GPG
 
@@ -92,7 +92,7 @@ Once the tag is pushed, the [Publish to Maven Central](https://github.com/cashap
 
 ### 4. Create GitHub Release
 
-1. Go to [GitHub Releases](https://github.com/cashapp/kfsm/releases/new)
+1. Go to [GitHub Releases](https://github.com/block/domain-api/releases/new)
 2. Select the tag you just created (`v$RELEASE_VERSION`)
 3. Copy the release notes from `CHANGELOG.md` into the release description
 4. Publish the release
@@ -158,13 +158,7 @@ If you don't have access to the required secrets or Sonatype account, contact th
 
 Each release includes:
 
-- **Core Library**: `app.cash.kfsm:kfsm:$version`
-  - Main JAR with compiled classes
-  - Sources JAR
-  - Javadoc JAR
-  - POM file
-
-- **Guice Integration**: `app.cash.kfsm:kfsm-guice:$version`
+- **Core Library**: `xyz.block.domainapi:domain-api:$version`
   - Main JAR with compiled classes
   - Sources JAR
   - Javadoc JAR
