@@ -78,9 +78,8 @@ Once the release PR is merged to main:
 
 Once the tag is pushed, the [Publish to Maven Central](https://github.com/block/domain-api/actions/workflows/publish.yml) workflow will automatically:
 
-1. Build both artifacts:
-   - `xyz.block.domainapi:kfsm:$version` (core library)
-   - `xyz.block.domainapi:kfsm-guice:$version` (Guice integration)
+1. Build the artifact:
+   - `xyz.block.domainapi:domain-api:$version`
 
 2. Sign the artifacts with GPG
 

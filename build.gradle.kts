@@ -16,7 +16,7 @@ subprojects {
       jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
   }
-  
+
   tasks.withType<Test> {
     useJUnitPlatform()
   }
@@ -25,7 +25,6 @@ subprojects {
 tasks.register("publishToMavenCentral") {
   group = "publishing"
   dependsOn(
-    ":lib:publishToMavenCentral",
-    ":lib-guice:publishToMavenCentral",
+    ":lib:publishToMavenCentral"
   )
 }
