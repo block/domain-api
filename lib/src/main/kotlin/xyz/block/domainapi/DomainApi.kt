@@ -41,7 +41,7 @@ interface DomainApi<INITIAL_REQUEST, PROCESS_ID, REQUIREMENT_ID, ATTRIBUTE_ID, P
    */
   fun execute(
     id: PROCESS_ID,
-    hurdleResponses: List<Input.HurdleResponse<REQUIREMENT_ID>>,
+    hurdleResponses: List<Input.HurdleResponse<REQUIREMENT_ID>>
   ): Result<ExecuteResponse<PROCESS_ID, REQUIREMENT_ID>>
 
   /**
@@ -64,7 +64,10 @@ interface DomainApi<INITIAL_REQUEST, PROCESS_ID, REQUIREMENT_ID, ATTRIBUTE_ID, P
    * @param resumeResult The result of the requirement needed to resume the process.
    * @return Unit if resuming was successful or a failure otherwise.
    */
-  fun resume(id: PROCESS_ID, resumeResult: Input.ResumeResult<REQUIREMENT_ID>): Result<Unit>
+  fun resume(
+    id: PROCESS_ID,
+    resumeResult: Input.ResumeResult<REQUIREMENT_ID>
+  ): Result<Unit>
 
   /**
    * Updates an attribute of a business process instance. For example, the selected speed of a Bitcoin on-chain
@@ -79,7 +82,7 @@ interface DomainApi<INITIAL_REQUEST, PROCESS_ID, REQUIREMENT_ID, ATTRIBUTE_ID, P
   fun update(
     id: PROCESS_ID,
     attributeId: ATTRIBUTE_ID,
-    hurdleResponses: List<Input.HurdleResponse<REQUIREMENT_ID>>,
+    hurdleResponses: List<Input.HurdleResponse<REQUIREMENT_ID>>
   ): Result<UpdateResponse<REQUIREMENT_ID, ATTRIBUTE_ID>>
 
   /**
@@ -95,7 +98,10 @@ interface DomainApi<INITIAL_REQUEST, PROCESS_ID, REQUIREMENT_ID, ATTRIBUTE_ID, P
    * @param parameter The search parameters.
    * @param limit The maximum number of results to return per page.
    */
-  fun search(parameter: SearchParameter, limit: Int): Result<SearchResult<ATTRIBUTE_ID, PROCESS>>
+  fun search(
+    parameter: SearchParameter,
+    limit: Int
+  ): Result<SearchResult<ATTRIBUTE_ID, PROCESS>>
 }
 
 /**
@@ -130,7 +136,7 @@ data class ExecuteResponse<PROCESS_ID, REQUIREMENT_ID>(
 data class UpdateResponse<REQUIREMENT_ID, ATTRIBUTE_ID>(
   val id: String,
   val attributeId: ATTRIBUTE_ID,
-  val interactions: List<UserInteraction<REQUIREMENT_ID>>,
+  val interactions: List<UserInteraction<REQUIREMENT_ID>>
 )
 
 /**
@@ -143,7 +149,9 @@ sealed class UserInteraction<REQUIREMENT_ID> {
    *
    * @param id The id of the requirement. The parametrised type is typically an enumeration.
    */
-  open class Hurdle<REQUIREMENT_ID>(val id: REQUIREMENT_ID) : UserInteraction<REQUIREMENT_ID>()
+  open class Hurdle<REQUIREMENT_ID>(
+    val id: REQUIREMENT_ID
+  ) : UserInteraction<REQUIREMENT_ID>()
 
   /**
    * A notification sent from the server to the client that does not require any action from the
@@ -151,22 +159,28 @@ sealed class UserInteraction<REQUIREMENT_ID> {
    *
    *  @param id The id of the requirement. The parametrised type is typically an enumeration.
    */
-  open class Notification<REQUIREMENT_ID>(val id: REQUIREMENT_ID) :
-    UserInteraction<REQUIREMENT_ID>()
+  open class Notification<REQUIREMENT_ID>(
+    val id: REQUIREMENT_ID
+  ) : UserInteraction<REQUIREMENT_ID>()
 }
 
 /**
  * Represents an input into the system for a requirement.
  */
-sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCode) {
+sealed class Input<REQUIREMENT_ID>(
+  val id: REQUIREMENT_ID,
+  val result: ResultCode
+) {
   /**
    * Represents the response to a server sent to the client.
    *
    * @param id The id of the requirement. This is typically an enumeration.
    * @param code The result of attempting to overcome the hurdle.
    */
-  open class HurdleResponse<REQUIREMENT_ID>(id: REQUIREMENT_ID, code: ResultCode) :
-    Input<REQUIREMENT_ID>(id, code)
+  open class HurdleResponse<REQUIREMENT_ID>(
+    id: REQUIREMENT_ID,
+    code: ResultCode
+  ) : Input<REQUIREMENT_ID>(id, code)
 
   /**
    * A result sent to the business process as part of a resume operation. If there is specific data
@@ -176,8 +190,9 @@ sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCod
    *
    * @param id The id of the requirement whose result is needed to resume the process.
    */
-  open class ResumeResult<REQUIREMENT_ID>(id: REQUIREMENT_ID) :
-    Input<REQUIREMENT_ID>(id, ResultCode.CLEARED)
+  open class ResumeResult<REQUIREMENT_ID>(
+    id: REQUIREMENT_ID
+  ) : Input<REQUIREMENT_ID>(id, ResultCode.CLEARED)
 }
 
 /** The possible results of attempting to overcome a hurdle. */
@@ -201,7 +216,7 @@ enum class ResultCode {
   FINISHED_OK,
 
   /** This is a terminal result, and the process ended with an error. */
-  FINISHED_ERROR,
+  FINISHED_ERROR
 }
 
 /**
@@ -214,7 +229,7 @@ enum class ResultCode {
 class ProcessInfo<ATTRIBUTE_ID, PROCESS>(
   val id: String,
   val process: PROCESS,
-  val updatableAttributes: List<ATTRIBUTE_ID>,
+  val updatableAttributes: List<ATTRIBUTE_ID>
 )
 
 /**
@@ -241,21 +256,27 @@ class ProcessInfo<ATTRIBUTE_ID, PROCESS>(
  * ```
  */
 sealed class SearchParameter {
-  sealed class LogicalExpression(open val operands: List<SearchParameter>) : SearchParameter() {
-    data class And(override val operands: List<SearchParameter>) : LogicalExpression(operands)
+  sealed class LogicalExpression(
+    open val operands: List<SearchParameter>
+  ) : SearchParameter() {
+    data class And(
+      override val operands: List<SearchParameter>
+    ) : LogicalExpression(operands)
 
-    data class Or(override val operands: List<SearchParameter>) : LogicalExpression(operands)
+    data class Or(
+      override val operands: List<SearchParameter>
+    ) : LogicalExpression(operands)
   }
 
   data class ParameterExpression<T>(
     val parameter: T,
     val compareOperator: CompareOperator,
-    val values: List<CompareValue>,
+    val values: List<CompareValue>
   ) : SearchParameter() {
     constructor(
       parameter: T,
       compareOperator: CompareOperator,
-      vararg values: CompareValue,
+      vararg values: CompareValue
     ) : this(parameter, compareOperator, values.toList())
   }
 }
@@ -269,16 +290,22 @@ enum class CompareOperator {
   GREATER_THAN_OR_EQUAL,
   LESS_THAN_OR_EQUAL,
   IN,
-  NOT_IN,
+  NOT_IN
 }
 
 /** Represents a value used in a search expression. */
 sealed class CompareValue {
-  data class StringValue(val value: String) : CompareValue()
+  data class StringValue(
+    val value: String
+  ) : CompareValue()
 
-  data class DateValue(val value: LocalDate) : CompareValue()
+  data class DateValue(
+    val value: LocalDate
+  ) : CompareValue()
 
-  data class LongValue(val value: Long) : CompareValue()
+  data class LongValue(
+    val value: Long
+  ) : CompareValue()
 }
 
 /**
@@ -295,33 +322,38 @@ data class SearchResult<ATTRIBUTE_ID, PROCESS>(
   val thisStart: Int,
   val prevStart: Int?,
   val nextStart: Int?,
-  val results: List<ProcessInfo<ATTRIBUTE_ID, PROCESS>>,
+  val results: List<ProcessInfo<ATTRIBUTE_ID, PROCESS>>
 )
 
 /** Common errors returned by the domain API. */
-sealed class DomainApiError : Throwable() {
-
+sealed class DomainApiError : Exception() {
   /**
    * A generic error occurred.
    *
    * @param cause The cause of the error.
    */
-  data class ServerError(override val cause: Throwable?) : DomainApiError()
+  data class ServerError(
+    override val cause: Throwable?
+  ) : DomainApiError()
 
   /**
    * A generic client error occurred.
    *
    * @param message The error message.
    */
-  data class ClientError(override val message: String) : DomainApiError()
+  data class ClientError(
+    override val message: String
+  ) : DomainApiError()
 
   /**
    * An attempt to resume the process was made but the process cannot be resumed.
    *
    * @param id The id of the process instance that cannot be resumed.
    */
-  data class CannotResumeProcess(val id: String, override val message: String) :
-    DomainApiError(),
+  data class CannotResumeProcess(
+    val id: String,
+    override val message: String
+  ) : DomainApiError(),
     WarnOnly
 
   /**
@@ -329,8 +361,10 @@ sealed class DomainApiError : Throwable() {
    *
    * @param id The id of the process instance that could not be updated.
    */
-  data class CannotUpdateProcess(val id: String, override val message: String) :
-    DomainApiError(),
+  data class CannotUpdateProcess(
+    val id: String,
+    override val message: String
+  ) : DomainApiError(),
     WarnOnly
 
   /**
@@ -338,8 +372,9 @@ sealed class DomainApiError : Throwable() {
    *
    * @param id The id of the process instance that cannot be found.
    */
-  data class ProcessNotFound(val id: String) :
-    DomainApiError(),
+  data class ProcessNotFound(
+    val id: String
+  ) : DomainApiError(),
     WarnOnly
 
   /**
@@ -347,8 +382,9 @@ sealed class DomainApiError : Throwable() {
    *
    * @param parameter The invalid search parameter.
    */
-  data class InvalidSearchParameter(val parameter: SearchParameter) :
-    DomainApiError(),
+  data class InvalidSearchParameter(
+    val parameter: SearchParameter
+  ) : DomainApiError(),
     InfoOnly
 
   /**
@@ -356,8 +392,9 @@ sealed class DomainApiError : Throwable() {
    *
    * @param id The id of the process instance that already exists.
    */
-  data class ProcessAlreadyExists(val id: String) :
-    DomainApiError(),
+  data class ProcessAlreadyExists(
+    val id: String
+  ) : DomainApiError(),
     InfoOnly
 
   /**
@@ -366,8 +403,10 @@ sealed class DomainApiError : Throwable() {
    * @param id The id of the process instance.
    * @param requirement The requirement that has already been processed.
    */
-  data class HurdleResultAlreadyProcessed(val id: String, val requirement: String) :
-    DomainApiError(),
+  data class HurdleResultAlreadyProcessed(
+    val id: String,
+    val requirement: String
+  ) : DomainApiError(),
     InfoOnly
 
   /**
@@ -376,8 +415,10 @@ sealed class DomainApiError : Throwable() {
    * @param id - The id of the process instance.
    * @param requirement - The requirement where the illegal request to go back originated.
    */
-  data class GoingBackUnsupported(val id: String, val requirement: String) :
-    DomainApiError(),
+  data class GoingBackUnsupported(
+    val id: String,
+    val requirement: String
+  ) : DomainApiError(),
     WarnOnly
 
   /**
@@ -386,8 +427,10 @@ sealed class DomainApiError : Throwable() {
    * @param id The id of the process instance.
    * @param requirement The requirement the user tried to skip.
    */
-  data class SkippingRequirementUnsupported(val id: String, val requirement: String) :
-    DomainApiError(),
+  data class SkippingRequirementUnsupported(
+    val id: String,
+    val requirement: String
+  ) : DomainApiError(),
     WarnOnly
 
   /**
@@ -397,13 +440,16 @@ sealed class DomainApiError : Throwable() {
    * @param id The id of the process instance.
    * @param resultCode The unsupported hurdle result code.
    */
-  data class UnsupportedHurdleResultCode(val id: String, val resultCode: ResultCode) :
-    DomainApiError(),
+  data class UnsupportedHurdleResultCode(
+    val id: String,
+    val resultCode: ResultCode
+  ) : DomainApiError(),
     WarnOnly
 
   /** Used to indicate that a process instance was canceled, e.g., when the client sends a canceled hurdle result. */
-  data class ProcessWasCancelled(val id: String) :
-    DomainApiError(),
+  data class ProcessWasCancelled(
+    val id: String
+  ) : DomainApiError(),
     InfoOnly
 
   /**
@@ -413,8 +459,10 @@ sealed class DomainApiError : Throwable() {
    * @param id The id of the process instance.
    * @param requirement The requirement that the result is for.
    */
-  data class InvalidRequirementResult(val id: String, val requirement: String) :
-    DomainApiError(),
+  data class InvalidRequirementResult(
+    val id: String,
+    val requirement: String
+  ) : DomainApiError(),
     WarnOnly
 
   /**
@@ -422,10 +470,12 @@ sealed class DomainApiError : Throwable() {
    *
    * @param id The id of the process instance.
    */
-  data class AlreadyProcessing(val id: String) :
-    DomainApiError(),
+  data class AlreadyProcessing(
+    val id: String
+  ) : DomainApiError(),
     InfoOnly
 }
 
 interface InfoOnly
+
 interface WarnOnly

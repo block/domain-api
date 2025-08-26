@@ -3,11 +3,9 @@ package xyz.block.domainapi.util
 import app.cash.kfsm.State
 import app.cash.kfsm.Value
 import arrow.core.raise.result
-import xyz.block.domainapi.DomainApiError
 import xyz.block.domainapi.ExecuteResponse
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
-import xyz.block.domainapi.ResultCode
 
 abstract class ProcessAdvancer<ID, STATE : State<ID, T, STATE>, T : Value<ID, T, STATE>, REQ> {
   /**
@@ -20,7 +18,10 @@ abstract class ProcessAdvancer<ID, STATE : State<ID, T, STATE>, T : Value<ID, T,
    * Provides a hook to react to failures in the process advancer. This can be used, e.g., to transition to a failed
    * state when an error happens.
    */
-  open fun onExecuteFailure(instance: T, error: Throwable) = Unit
+  open fun onExecuteFailure(
+    instance: T,
+    error: Throwable
+  ) = Unit
 
   /**
    * This function is called to continue executing the process once the information required to continue has been
@@ -37,21 +38,32 @@ abstract class ProcessAdvancer<ID, STATE : State<ID, T, STATE>, T : Value<ID, T,
    *   the next state is called with no requirement results. Otherwise, the process is complete and returns the result
    *   to the client.
    */
-  fun execute(instance: T, requirementResults: List<Input<REQ>>): Result<ExecuteResponse<ID, REQ>> =
+  fun execute(
+    instance: T,
+    requirementResults: List<Input<REQ>>,
+    operation: Operation
+  ): Result<ExecuteResponse<ID, REQ>> =
     result {
-      requirementResults.find { it.result == ResultCode.CANCELLED }?.let {
-        raise(DomainApiError.ProcessWasCancelled(it.id.toString()))
-      }
       val controller = getController(instance).bind()
-      when (val processingState = controller.process(instance, requirementResults).bind()) {
+      when (
+        val processingState =
+          controller
+            .process(
+              instance,
+              requirementResults,
+              operation
+            ).bind()
+      ) {
         // This means there are no more hurdles to overcome, so the process instance transitioned to a new state
         is ProcessingState.Complete -> {
-          if (processingState.value.state.reachableStates.isEmpty()) {
+          if (processingState.value.state.reachableStates
+              .isEmpty()
+          ) {
             // If this is a terminal state, then we return the result to the client
             ExecuteResponse(id = instance.id, interactions = emptyList(), nextEndpoint = null)
           } else {
             // Otherwise, we get the controller for the new state and execute it with no requirement results
-            execute(processingState.value, emptyList()).bind()
+            execute(processingState.value, emptyList(), operation).bind()
           }
         }
 
@@ -69,6 +81,5 @@ abstract class ProcessAdvancer<ID, STATE : State<ID, T, STATE>, T : Value<ID, T,
           )
         }
       }
-    }
-      .onFailure { onExecuteFailure(instance, it) }
+    }.onFailure { onExecuteFailure(instance, it) }
 }

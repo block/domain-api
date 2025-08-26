@@ -8,9 +8,10 @@ import xyz.block.domainapi.ProcessingState
 class FinalController(
   stateMachine: StateMachine<String, TestValue, TestState>
 ) : Controller<String, TestState, TestValue, TestRequirement>(stateMachine) {
-  override fun process(
+  override fun processInputs(
     value: TestValue,
-    inputs: List<Input<TestRequirement>>
+    inputs: List<Input<TestRequirement>>,
+    operation: Operation
   ): Result<ProcessingState<TestValue, TestRequirement>> =
     result {
       when (value.state) {
