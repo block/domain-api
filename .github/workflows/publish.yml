@@ -53,13 +53,13 @@ jobs:
 
       - name: Build HTML
         if: steps.check-branch.outputs.tag_on_main == 'true'
-        run: bin/gradle dokkaHtmlMultiModule --no-daemon --stacktrace
+        run: bin/gradle dokkaHtml --no-daemon --stacktrace
 
       - name: Upload HTML
         if: steps.check-branch.outputs.tag_on_main == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/dokka/html
+          path: lib/build/dokka/html
           name: 'github-pages'
 
       - name: Deploy GitHub Pages site
