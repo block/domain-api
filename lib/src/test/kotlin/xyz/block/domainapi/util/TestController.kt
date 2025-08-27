@@ -7,11 +7,10 @@ import xyz.block.domainapi.Input
 import xyz.block.domainapi.UserInteraction
 
 class TestController(
-  stateMachine: StateMachine<String, TestValue, TestState>
-) : InfoCollectionController<String, TestState, TestValue, TestRequirement>(
-    pendingCollectionState = Initial,
-    stateMachine = stateMachine
-  ) {
+  override val stateMachine: StateMachine<String, TestValue, TestState>
+) : InfoCollectionController<String, TestState, TestValue, TestRequirement> {
+  override val pendingCollectionState = Initial
+
   override fun findMissingRequirements(value: TestValue) =
     when (value.state) {
       is Initial -> listOf(TestRequirement.REQ1, TestRequirement.REQ2).success()
@@ -38,14 +37,6 @@ class TestController(
 
   override fun requiresSecureEndpoint(requirement: TestRequirement): Boolean = false
 
-  override fun fail(
-    failure: Throwable,
-    value: TestValue
-  ): Result<TestValue> =
-    result {
-      value
-    }
-
   override fun transition(value: TestValue): Result<TestValue> =
     result {
       when (value.state) {
@@ -56,4 +47,8 @@ class TestController(
         else -> raise(IllegalStateException("Invalid state ${value.state}"))
       }
     }
+
+  override fun handleFailure(failure: Throwable, value: TestValue): Result<TestValue> = result {
+    value
+  }
 }
