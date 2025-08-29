@@ -13,7 +13,7 @@ class ControllerTest {
     val controller = TestController(stateMachine)
     val value = TestValue("test", Complete)
 
-    val result = controller.process(value, emptyList(), Operation.EXECUTE)
+    val result = controller.processInputs(value, emptyList(), Operation.EXECUTE)
 
     result.isFailure shouldBe true
     result.exceptionOrNull()!!.message shouldBe "State should be Initial but was Complete"
@@ -24,7 +24,7 @@ class ControllerTest {
     val controller = TestController(stateMachine)
     val value = TestValue("test", Initial)
 
-    val result = controller.process(value, emptyList(), Operation.EXECUTE)
+    val result = controller.processInputs(value, emptyList(), Operation.EXECUTE)
 
     result.getOrThrow() shouldBe
       ProcessingState.UserInteractions(
@@ -39,7 +39,7 @@ class ControllerTest {
     val value = TestValue("test", Initial)
 
     val result =
-      controller.process(
+      controller.processInputs(
         value,
         listOf(
           TestRequirementResult(TestRequirement.REQ1, ResultCode.CLEARED),
@@ -59,7 +59,7 @@ class ControllerTest {
     val value = TestValue("test", Initial)
     val requirementResult = TestRequirementResult(TestRequirement.REQ1, ResultCode.CANCELLED)
 
-    val result = controller.process(value, listOf(requirementResult), Operation.EXECUTE)
+    val result = controller.processInputs(value, listOf(requirementResult), Operation.EXECUTE)
 
     result.exceptionOrNull() shouldBe DomainApiError.ProcessWasCancelled(TestRequirement.REQ1.toString())
   }
@@ -70,7 +70,7 @@ class ControllerTest {
     val value = TestValue("test", Initial)
 
     val result =
-      controller.process(
+      controller.processInputs(
         value,
         listOf(
           TestRequirementResult(TestRequirement.REQ1, ResultCode.CLEARED),
