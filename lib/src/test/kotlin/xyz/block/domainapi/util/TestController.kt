@@ -10,6 +10,7 @@ class TestController(
   override val stateMachine: StateMachine<String, TestValue, TestState>
 ) : InfoCollectionController<String, TestState, TestValue, TestRequirement> {
   override val pendingCollectionState = Initial
+  override val hurdleGroups = mapOf<String, HurdleGroup<TestRequirement>>()
 
   override fun findMissingRequirements(value: TestValue) =
     when (value.state) {

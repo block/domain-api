@@ -13,6 +13,8 @@ import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.ResultCode
 import xyz.block.domainapi.UserInteraction
 import xyz.block.domainapi.UserInteraction.Hurdle
+import xyz.block.domainapi.util.HurdleGroupException.InvalidHurdleGroup
+import xyz.block.domainapi.util.HurdleGroupException.UnknownHurdleGroup
 
 @Suppress("TooManyFunctions")
 interface InfoCollectionController<
@@ -24,18 +26,29 @@ interface InfoCollectionController<
 
   val pendingCollectionState: STATE
 
+  val hurdleGroups: Map<String, HurdleGroup<R>>
+
   override fun processInputs(
     value: T,
     inputs: List<Input<R>>,
-    operation: Operation
+    operation: Operation,
+    hurdleGroupId: String?
   ): Result<ProcessingState<T, R>> = result {
     processInputsFromOperation(value, inputs, operation).bind()
       ?: if (inputs.all { it is Input.HurdleResponse }) {
         val hurdleResponses = inputs.map { it as Input.HurdleResponse }
         when (value.state) {
-          pendingCollectionState -> processPendingCollectionState(value, hurdleResponses).bind()
+          pendingCollectionState ->
+            processPendingCollectionState(
+              value,
+              hurdleResponses,
+              hurdleGroupId
+            ).bind()
           else -> {
-            val failure = IllegalStateException("State should be $pendingCollectionState but was ${value.state}")
+            val failure =
+              IllegalStateException(
+                "State should be $pendingCollectionState but was ${value.state}"
+              )
             raise(failure)
           }
         }
@@ -110,8 +123,9 @@ interface InfoCollectionController<
   private fun processPendingCollectionState(
     value: T,
     hurdleResponses: List<Input.HurdleResponse<R>>,
+    userInteractionGroupingProfileId: String?
   ): Result<ProcessingState<T, R>> = result {
-    // Otherwise we need to check the hurdle results to see if everything that is required has been sent to us
+    // We need to check the hurdle results to see if everything that is required has been sent to us
     // But first we need to check if the process was cancelled - in this case there is no need to continue
     // processing
     checkCancelled(value, hurdleResponses).bind()
@@ -145,8 +159,17 @@ interface InfoCollectionController<
           ProcessingState.Complete(updatedValue)
         }
       } else {
+        // Filter hurdles based on specified group, if any
+        val filteredUpdatedMissingRequirements = userInteractionGroupingProfileId?.let {
+          val hurdleGroup = hurdleGroups[it]
+            ?: raise(
+              UnknownHurdleGroup("No hurdle group $it was found [available: ${hurdleGroups.keys}]")
+            )
+          hurdleGroup.filter(updatedMissingRequirements).bind()
+        } ?: updatedMissingRequirements
+
         // This is likely to involve RPC calls so it's done outside the transaction
-        val hurdles = updatedMissingRequirements.fold(emptyList<Hurdle<R>>()) {
+        val hurdles = filteredUpdatedMissingRequirements.fold(emptyList<Hurdle<R>>()) {
             acc,
             requirementId
           ->
@@ -248,4 +271,32 @@ interface InfoCollectionController<
       }
       .bind()
   }
+}
+
+/**
+ * Indicates how hurdles should be grouped. A service will always try to return as many hurdles as
+ * possible at once, for performance reasons. However, in some cases, a client might require hurdles
+ * to be returned differently, depending on the UI design. A hurdle group can be used to alter the
+ * way the service returns its hurdles.
+ */
+data class HurdleGroup<R>(val id: String, val groups: List<Set<R>>) {
+  /**
+   * Filters `interactions` by the first group that is a subset of it. Returns the matching items in
+   * the original `interactions` order, or null if no group matches.
+   */
+  fun filter(hurdles: List<R>): Result<List<R>> = result {
+    val reqSet = hurdles.toSet()
+    val subset = groups.firstOrNull { group -> reqSet.containsAll(group) }
+      ?: raise(
+        InvalidHurdleGroup(
+          "Requested hurdles are not contained in any group in profile $id: [$hurdles]"
+        )
+      )
+    hurdles.filter { it in subset }
+  }
+}
+
+sealed class HurdleGroupException : Exception() {
+  data class InvalidHurdleGroup(override val message: String) : HurdleGroupException()
+  data class UnknownHurdleGroup(override val message: String) : HurdleGroupException()
 }

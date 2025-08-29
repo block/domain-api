@@ -18,10 +18,7 @@ abstract class ProcessAdvancer<ID, STATE : State<ID, T, STATE>, T : Value<ID, T,
    * Provides a hook to react to failures in the process advancer. This can be used, e.g., to transition to a failed
    * state when an error happens.
    */
-  open fun onExecuteFailure(
-    instance: T,
-    error: Throwable
-  ) = Unit
+  open fun onExecuteFailure(instance: T, error: Throwable) = Unit
 
   /**
    * This function is called to continue executing the process once the information required to continue has been
@@ -41,45 +38,67 @@ abstract class ProcessAdvancer<ID, STATE : State<ID, T, STATE>, T : Value<ID, T,
   fun execute(
     instance: T,
     requirementResults: List<Input<REQ>>,
-    operation: Operation
-  ): Result<ExecuteResponse<ID, REQ>> =
-    result {
-      val controller = getController(instance).bind()
-      when (
-        val processingState =
-          controller
-            .process(
-              instance,
-              requirementResults,
-              operation
-            ).bind()
-      ) {
-        // This means there are no more hurdles to overcome, so the process instance transitioned to a new state
-        is ProcessingState.Complete -> {
-          if (processingState.value.state.reachableStates
-              .isEmpty()
-          ) {
-            // If this is a terminal state, then we return the result to the client
-            ExecuteResponse(id = instance.id, interactions = emptyList(), nextEndpoint = null)
-          } else {
-            // Otherwise, we get the controller for the new state and execute it with no requirement results
-            execute(processingState.value, emptyList(), operation).bind()
-          }
-        }
-
-        // This means we're waiting for an external event with no specific hurdles
-        is ProcessingState.Waiting -> {
+    operation: Operation,
+    hurdleGroupId: String? = null
+  ): Result<ExecuteResponse<ID, REQ>> = result {
+    when (
+      val processingState = process(
+        instance,
+        requirementResults,
+        operation,
+        hurdleGroupId
+      ).bind()
+    ) {
+      // This means there are no more hurdles to overcome, so the process instance transitioned to a new state
+      is ProcessingState.Complete -> {
+        if (processingState.value.state.reachableStates.isEmpty()) {
+          // If this is a terminal state, then we return the result to the client
           ExecuteResponse(id = instance.id, interactions = emptyList(), nextEndpoint = null)
-        }
-
-        // This means there are still hurdles to be overcome by the client so we return the missing hurdles
-        is ProcessingState.UserInteractions -> {
-          ExecuteResponse(
-            id = instance.id,
-            interactions = processingState.hurdles,
-            nextEndpoint = processingState.nextEndpoint
-          )
+        } else {
+          // Otherwise, we get the controller for the new state and execute it with no requirement results
+          execute(processingState.value, emptyList(), operation).bind()
         }
       }
-    }.onFailure { onExecuteFailure(instance, it) }
+
+      // This means we're waiting for an external event with no specific hurdles
+      is ProcessingState.Waiting -> {
+        ExecuteResponse(id = instance.id, interactions = emptyList(), nextEndpoint = null)
+      }
+
+      // This means there are still hurdles to be overcome by the client so we return the missing hurdles
+      is ProcessingState.UserInteractions -> {
+        ExecuteResponse(
+          id = instance.id,
+          interactions = processingState.hurdles,
+          nextEndpoint = processingState.nextEndpoint
+        )
+      }
+    }
+  }
+    .onFailure { onExecuteFailure(instance, it) }
+
+  /**
+   * Called when a client calls the execute or resume endpoints.
+   *
+   * @param value The process value.
+   * @param inputs The inputs sent by the client or another service.
+   * @param operation The operation that initiated this call.
+   * @param hurdleGroupId The id of an optional [xyz.block.domainapi.util.HurdleGroup] that
+   * specifies how hurdles should be returned.
+   * @return Either the updated process value or a list of hurdles that are still missing.
+   */
+  fun process(
+    value: T,
+    inputs: List<Input<REQ>>,
+    operation: Operation,
+    hurdleGroupId: String? = null
+  ): Result<ProcessingState<T, REQ>> = result {
+    val controller = getController(value).bind()
+    result {
+      controller.handleCancelled(value, inputs).bind()
+        ?: controller.processInputs(value, inputs, operation, hurdleGroupId).bind()
+    }.onFailure {
+      controller.handleFailure(it, value).bind()
+    }.bind()
+  }
 }

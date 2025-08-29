@@ -29,7 +29,11 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
   private val pizzaOrdersMap: MutableMap<String, PizzaOrder> = mutableMapOf()
 
   /** Creates a new pizza order. */
-  override fun create(id: String, initialRequest: InitialRequest): Result<ExecuteResponse<String, RequirementId>> {
+  override fun create(
+    id: String,
+    initialRequest: InitialRequest,
+    hurdleGroupId: String?
+  ): Result<ExecuteResponse<String, RequirementId>> {
     if (!pizzaOrdersMap.containsKey(id)) {
       val newPizzaOrder = PizzaOrder(id, PizzaOrderState.ORDERING)
       val hurdles: MutableList<Hurdle<RequirementId>> = mutableListOf()
@@ -60,18 +64,19 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
   override fun execute(
     id: String,
     hurdleResponses: List<HurdleResponse<RequirementId>>,
+    hurdleGroupId: String?
   ): Result<ExecuteResponse<String, RequirementId>> = result { doExecute(id, hurdleResponses, false).bind() }
 
   private fun doExecute(
     id: String,
-    hurdleResponses: List<HurdleResponse<RequirementId>>,
+    hurdleResults: List<HurdleResponse<RequirementId>>,
     allowUpdate: Boolean,
   ): Result<ExecuteResponse<String, RequirementId>> = result {
     val pizzaOrder = pizzaOrdersMap[id].toOption().toEither { DomainApiError.ProcessNotFound(id) }.bind()
-    hurdleResponses
+    hurdleResults
       .fold(Result.success(PizzaOrderAndHurdles(pizzaOrder, emptyList()))) {
-        accumulator: Result<PizzaOrderAndHurdles>,
-        hurdleResult ->
+          accumulator: Result<PizzaOrderAndHurdles>,
+          hurdleResult ->
         val current = accumulator.bind()
         val newPizzaOrder = processHurdleResult(current.pizzaOrder, hurdleResult, allowUpdate).bind()
         newPizzaOrder.fold(
@@ -176,16 +181,16 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
             is CompareValue.StringValue -> {
               val value = (values[0] as CompareValue.StringValue).value
               Result.runCatching {
-                  val targetState = PizzaOrderState.valueOf(value)
-                  val results = pizzaOrdersMap.values.filter { it.state == targetState }
-                  SearchResult(
-                    limit = limit,
-                    thisStart = 0,
-                    prevStart = null,
-                    nextStart = null,
-                    results = results.map { ProcessInfo(it.id, it, listOf(AttributeId.DELIVERY_SPEED)) }.take(limit),
-                  )
-                }
+                val targetState = PizzaOrderState.valueOf(value)
+                val results = pizzaOrdersMap.values.filter { it.state == targetState }
+                SearchResult(
+                  limit = limit,
+                  thisStart = 0,
+                  prevStart = null,
+                  nextStart = null,
+                  results = results.map { ProcessInfo(it.id, it, listOf(AttributeId.DELIVERY_SPEED)) }.take(limit),
+                )
+              }
                 .recover {
                   SearchResult(limit = limit, thisStart = 0, prevStart = null, nextStart = null, results = emptyList())
                 }

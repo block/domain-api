@@ -12,7 +12,8 @@ class FinalController(
   override fun processInputs(
     value: TestValue,
     inputs: List<Input<TestRequirement>>,
-    operation: Operation
+    operation: Operation,
+    hurdleGroupId: String?
   ): Result<ProcessingState<TestValue, TestRequirement>> =
     result {
       when (value.state) {
