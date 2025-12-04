@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-## [0.0.1]
+## [0.1.0]
+
+* Made hurdles and hurdle responses serialisable so subclasses can also be serialised.
 
 ### Added
 
