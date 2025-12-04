@@ -1,6 +1,7 @@
 package xyz.block.domainapi
 
 import java.time.LocalDate
+import kotlinx.serialization.Serializable
 
 /**
  * Interface of a service that executes a business process, for example, withdraw Bitcoin on-chain. It has the following
@@ -143,6 +144,7 @@ data class UpdateResponse<REQUIREMENT_ID, ATTRIBUTE_ID>(
 /**
  * Represent information sent from the server to the client.
  */
+@Serializable
 sealed class UserInteraction<REQUIREMENT_ID> {
   /**
    * An indication sent from the server to the client indicating that user action is required, e.g.,
@@ -150,6 +152,7 @@ sealed class UserInteraction<REQUIREMENT_ID> {
    *
    * @param id The id of the requirement. The parametrised type is typically an enumeration.
    */
+  @Serializable
   open class Hurdle<REQUIREMENT_ID>(val id: REQUIREMENT_ID) : UserInteraction<REQUIREMENT_ID>()
 
   /**
@@ -158,6 +161,7 @@ sealed class UserInteraction<REQUIREMENT_ID> {
    *
    *  @param id The id of the requirement. The parametrised type is typically an enumeration.
    */
+  @Serializable
   open class Notification<REQUIREMENT_ID>(val id: REQUIREMENT_ID) :
     UserInteraction<REQUIREMENT_ID>()
 }
@@ -165,6 +169,7 @@ sealed class UserInteraction<REQUIREMENT_ID> {
 /**
  * Represents an input into the system for a requirement.
  */
+@Serializable
 sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCode) {
   /**
    * Represents the response to a server sent to the client.
@@ -172,6 +177,7 @@ sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCod
    * @param id The id of the requirement. This is typically an enumeration.
    * @param code The result of attempting to overcome the hurdle.
    */
+  @Serializable
   open class HurdleResponse<REQUIREMENT_ID>(id: REQUIREMENT_ID, code: ResultCode) :
     Input<REQUIREMENT_ID>(id, code)
 
@@ -183,6 +189,7 @@ sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCod
    *
    * @param id The id of the requirement whose result is needed to resume the process.
    */
+  @Serializable
   open class ResumeResult<REQUIREMENT_ID>(id: REQUIREMENT_ID) :
     Input<REQUIREMENT_ID>(id, ResultCode.CLEARED)
 }

@@ -25,6 +25,7 @@ dependencies {
   implementation(libs.arrow)
   implementation(libs.jooq)
   implementation(libs.kfsm)
+  implementation(libs.kotlinxSerializationCore)
   implementation(libs.quiver)
 
   // Test dependencies
