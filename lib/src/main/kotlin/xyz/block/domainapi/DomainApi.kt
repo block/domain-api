@@ -170,7 +170,10 @@ sealed class UserInteraction<REQUIREMENT_ID> {
  * Represents an input into the system for a requirement.
  */
 @Serializable
-sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCode) {
+sealed class Input<REQUIREMENT_ID> {
+  abstract val id: REQUIREMENT_ID
+  abstract val result: ResultCode
+
   /**
    * Represents the response to a server sent to the client.
    *
@@ -178,8 +181,10 @@ sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCod
    * @param code The result of attempting to overcome the hurdle.
    */
   @Serializable
-  open class HurdleResponse<REQUIREMENT_ID>(id: REQUIREMENT_ID, code: ResultCode) :
-    Input<REQUIREMENT_ID>(id, code)
+  open class HurdleResponse<REQUIREMENT_ID>(
+    override val id: REQUIREMENT_ID,
+    override val result: ResultCode
+  ) : Input<REQUIREMENT_ID>()
 
   /**
    * A result sent to the business process as part of a resume operation. If there is specific data
@@ -190,8 +195,9 @@ sealed class Input<REQUIREMENT_ID>(val id: REQUIREMENT_ID, val result: ResultCod
    * @param id The id of the requirement whose result is needed to resume the process.
    */
   @Serializable
-  open class ResumeResult<REQUIREMENT_ID>(id: REQUIREMENT_ID) :
-    Input<REQUIREMENT_ID>(id, ResultCode.CLEARED)
+  open class ResumeResult<REQUIREMENT_ID>(override val id: REQUIREMENT_ID) : Input<REQUIREMENT_ID>() {
+    override val result: ResultCode = ResultCode.CLEARED
+  }
 }
 
 /** The possible results of attempting to overcome a hurdle. */
