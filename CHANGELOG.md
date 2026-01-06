@@ -1,6 +1,8 @@
 # Change Log
 
-## [Unreleased]
+## [0.2.0]
+
+* Added support for APIs that provide serialisation of hurdles, hurdle responses and notifications.
 
 ## [0.1.0]
 
