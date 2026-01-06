@@ -29,6 +29,7 @@ kotestProperty = { module = "io.kotest:kotest-property", version.ref = "kotest" 
 kotlinLoggingJvm = { module = "io.github.microutils:kotlin-logging-jvm", version.ref = "kotlinLogging" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinxSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlixSerialization" }
+kotlinxSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlixSerialization" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 quiver = { module = "app.cash.quiver:lib", version.ref = "quiver" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }

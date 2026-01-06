@@ -8,6 +8,9 @@ import arrow.core.raise.result
 import arrow.core.right
 import arrow.core.some
 import arrow.core.toOption
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.modules.SerializersModule
 import xyz.block.domainapi.CompareOperator
 import xyz.block.domainapi.CompareValue
 import xyz.block.domainapi.DomainApi
@@ -22,9 +25,22 @@ import xyz.block.domainapi.SearchParameter
 import xyz.block.domainapi.SearchResult
 import xyz.block.domainapi.UpdateResponse
 import xyz.block.domainapi.UserInteraction.Hurdle
+import xyz.block.domainapi.serialisation.SerialisableDomainApi
+import xyz.block.domainapi.serialisation.domainApiSerialisersModule
 
 /** A simple domain API for ordering pizza. */
-class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, AttributeId, PizzaOrder> {
+class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, AttributeId, PizzaOrder>,
+  SerialisableDomainApi {
+
+  override val serialisersModule: SerializersModule = domainApiSerialisersModule<RequirementId> {
+    hurdle(SizeHurdle::class, SizeHurdle.serializer())
+    hurdle(ToppingsHurdle::class, ToppingsHurdle.serializer())
+    hurdle(DeliverySpeedHurdle::class, DeliverySpeedHurdle.serializer())
+
+    hurdleResponse(SizeHurdleResult::class, SizeHurdleResult.serializer())
+    hurdleResponse(ToppingsHurdleResult::class, ToppingsHurdleResult.serializer())
+    hurdleResponse(DeliverySpeedHurdleResult::class, DeliverySpeedHurdleResult.serializer())
+  }
 
   private val pizzaOrdersMap: MutableMap<String, PizzaOrder> = mutableMapOf()
 
@@ -384,6 +400,8 @@ enum class DeliverySpeed {
 }
 
 /** A hurdle that requires the user to select a pizza size. Available pizza sizes are sent back to the caller. */
+@Serializable
+@SerialName("pizza.size")
 data class SizeHurdle(
   val availableSizes: List<PizzaSize> = listOf(PizzaSize.SMALL, PizzaSize.MEDIUM, PizzaSize.LARGE)
 ) : Hurdle<RequirementId>(RequirementId.PIZZA_SIZE)
@@ -392,21 +410,31 @@ data class SizeHurdle(
  * A hurdle that gives the user the option to select pizza toppings. Toppings are just strings so no need to send
  * anything back to the caller.
  */
+@Serializable
+@SerialName("pizza.toppings")
 data object ToppingsHurdle : Hurdle<RequirementId>(RequirementId.PIZZA_TOPPINGS)
 
 /**
  * A hurdle that requires the user to select a delivery speed. Available delivery speeds are sent back to the caller.
  */
+@Serializable
+@SerialName("pizza.delivery_speed")
 data class DeliverySpeedHurdle(
   val availableSpeeds: List<DeliverySpeed> = listOf(DeliverySpeed.STANDARD, DeliverySpeed.STRAIGHT_TO_YOUR_DOOR)
 ) : Hurdle<RequirementId>(RequirementId.DELIVERY_SPEED)
 
+@Serializable
+@SerialName("pizza.size_response")
 data class SizeHurdleResult(val size: PizzaSize, val code: ResultCode) :
   HurdleResponse<RequirementId>(RequirementId.PIZZA_SIZE, code)
 
+@Serializable
+@SerialName("pizza.toppings_response")
 data class ToppingsHurdleResult(val toppings: List<String>, val code: ResultCode) :
   HurdleResponse<RequirementId>(RequirementId.PIZZA_TOPPINGS, code)
 
+@Serializable
+@SerialName("pizza.delivery_speed_response")
 data class DeliverySpeedHurdleResult(val speed: DeliverySpeed, val code: ResultCode) :
   HurdleResponse<RequirementId>(RequirementId.DELIVERY_SPEED, code)
 
