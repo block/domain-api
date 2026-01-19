@@ -276,10 +276,10 @@ class DomainApiLibTest {
       it.interactions shouldBe emptyList()
     }
 
-    // Pizza is making now, so it can go straight to delivery
+    // Pizza is making now, so it can't go straight to delivery
     api.resume(orderId, ResumeResult(RequirementId.PIZZA_OUT_FOR_DELIVERY)) shouldBeFailure
       {
-        it.shouldBeInstanceOf<DomainApiError.CannotResumeProcess>()
+        it.shouldBeInstanceOf<DomainApiError.InvalidProcessState>()
       }
   }
 
