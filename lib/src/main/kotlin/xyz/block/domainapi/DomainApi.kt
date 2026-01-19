@@ -336,11 +336,11 @@ sealed class DomainApiError : Exception() {
   data class ClientError(override val message: String) : DomainApiError()
 
   /**
-   * An attempt to resume the process was made but the process cannot be resumed.
+   * The process is in an invalid state for the operation that was attempted.
    *
-   * @param id The id of the process instance that cannot be resumed.
+   * @param id The id of the process instance that is in an invalid state.
    */
-  data class CannotResumeProcess(val id: String, override val message: String) :
+  data class InvalidProcessState(val id: String, override val message: String) :
     DomainApiError(),
     WarnOnly
 

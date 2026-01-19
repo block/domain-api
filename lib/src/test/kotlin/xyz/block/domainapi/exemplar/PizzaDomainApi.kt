@@ -119,21 +119,21 @@ class PizzaDomainApi : DomainApi<InitialRequest, String, RequirementId, Attribut
         if (pizzaOrder.state == PizzaOrderState.MAKING) {
           pizzaOrdersMap[id] = pizzaOrder.copy(state = PizzaOrderState.READY_FOR_DELIVERY)
         } else {
-          raise(DomainApiError.CannotResumeProcess(id, "Pizza is ready but it is not being made"))
+          raise(DomainApiError.InvalidProcessState(id, "Pizza is ready but it is not being made"))
         }
       }
       RequirementId.PIZZA_OUT_FOR_DELIVERY -> {
         if (pizzaOrder.state == PizzaOrderState.READY_FOR_DELIVERY) {
           pizzaOrdersMap[id] = pizzaOrder.copy(state = PizzaOrderState.DELIVERY_IN_PROGRESS)
         } else {
-          raise(DomainApiError.CannotResumeProcess(id, "Pizza is out for delivery but it wasn't ready"))
+          raise(DomainApiError.InvalidProcessState(id, "Pizza is out for delivery but it wasn't ready"))
         }
       }
       RequirementId.PIZZA_DELIVERED -> {
         if (pizzaOrder.state == PizzaOrderState.DELIVERY_IN_PROGRESS) {
           pizzaOrdersMap[id] = pizzaOrder.copy(state = PizzaOrderState.DELIVERED)
         } else {
-          raise(DomainApiError.CannotResumeProcess(id, "Pizza was delivered but it was not out for delivery"))
+          raise(DomainApiError.InvalidProcessState(id, "Pizza was delivered but it was not out for delivery"))
         }
       }
       else -> raise(DomainApiError.InvalidRequirementResult(id, resumeResult.id.toString()))
