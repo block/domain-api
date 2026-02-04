@@ -24,8 +24,8 @@ interface DomainApi<INITIAL_REQUEST, PROCESS_ID, REQUIREMENT_ID, ATTRIBUTE_ID, P
    * @param id The id of the process instance. This id should not exist in the system. Typically,
    * this is a UUID.
    * @param initialRequest The initial parameters required to start the process.
-   * @param hurdleGroupId The id of an optional [xyz.block.domainapi.util.HurdleGroup] that
-   * specifies how hurdles should be returned.
+   * @param hurdleGroupId The id of an optional hurdle group that specifies how hurdles should be
+   * returned.
    * @return The result of the executing the process or hurdles in there are requirements yet to be
    * fulfilled.
    */
@@ -41,8 +41,8 @@ interface DomainApi<INITIAL_REQUEST, PROCESS_ID, REQUIREMENT_ID, ATTRIBUTE_ID, P
    *
    * @param id The id of the process instance.
    * @param hurdleResponses The results of any hurdles that had been sent previously to the client.
-   * @param hurdleGroupId The id of an optional [xyz.block.domainapi.util.HurdleGroup] that
-   * specifies how hurdles should be returned.
+   * @param hurdleGroupId The id of an optional hurdle group that specifies how hurdles should be
+   * returned.
    * @return The result of the executing the process or hurdles in there are requirements yet to be
    * fulfilled.
    */
