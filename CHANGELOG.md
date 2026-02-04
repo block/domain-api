@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.5.0]
+
+* Split KFSM utilities into separate module.
+
 ## [0.4.0]
 
 * Downgrade JVM target to version 11 for better compatibility.
