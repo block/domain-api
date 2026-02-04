@@ -8,6 +8,7 @@ plugins {
   alias(libs.plugins.versionsGradlePlugin)
   alias(libs.plugins.versionCatalogUpdateGradlePlugin)
   alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
+  alias(libs.plugins.mavenPublish) apply false
   id("org.jetbrains.dokka") version "1.9.10"
 }
 

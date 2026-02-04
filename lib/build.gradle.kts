@@ -1,8 +1,8 @@
 plugins {
   id("java-library")
   id("java-test-fixtures")
-  id("org.jetbrains.kotlin.jvm")
-  id("com.vanniktech.maven.publish") version "0.34.0"
+  alias(libs.plugins.kotlinGradlePlugin)
+  alias(libs.plugins.mavenPublish)
   kotlin("plugin.serialization") version "1.9.0"
 }
 
