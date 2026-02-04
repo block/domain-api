@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'
       - 'lib-kfsm-v*'
+      - 'lib-kfsm-v2-v*'
 
 permissions:
   contents: read
@@ -35,13 +36,31 @@ jobs:
         id: release-info
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          if [[ "$TAG" == lib-kfsm-v* ]]; then
+          if [[ "$TAG" == lib-kfsm-v2-v* ]]; then
+            echo "module=lib-kfsm-v2" >> $GITHUB_OUTPUT
+            echo "version=${TAG#lib-kfsm-v2-v}" >> $GITHUB_OUTPUT
+            echo "properties_file=lib-kfsm-v2/gradle.properties" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" == lib-kfsm-v* ]]; then
             echo "module=lib-kfsm" >> $GITHUB_OUTPUT
             echo "version=${TAG#lib-kfsm-v}" >> $GITHUB_OUTPUT
+            echo "properties_file=lib-kfsm/gradle.properties" >> $GITHUB_OUTPUT
           else
             echo "module=all" >> $GITHUB_OUTPUT
             echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+            echo "properties_file=gradle.properties" >> $GITHUB_OUTPUT
           fi
+
+      - name: Validate version matches gradle.properties
+        if: steps.check-branch.outputs.tag_on_main == 'true'
+        run: |
+          PROPERTIES_FILE="${{ steps.release-info.outputs.properties_file }}"
+          TAG_VERSION="${{ steps.release-info.outputs.version }}"
+          FILE_VERSION=$(grep "^VERSION_NAME=" "$PROPERTIES_FILE" | cut -d'=' -f2)
+          if [[ "$TAG_VERSION" != "$FILE_VERSION" ]]; then
+            echo "::error::Version mismatch: tag has '$TAG_VERSION' but $PROPERTIES_FILE has '$FILE_VERSION'"
+            exit 1
+          fi
+          echo "✓ Version validated: $TAG_VERSION"
 
       - name: Set up JDK
         if: steps.check-branch.outputs.tag_on_main == 'true'
@@ -69,6 +88,16 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ steps.release-info.outputs.version }}
         run: bin/gradle :lib-kfsm:publishToMavenCentral
+
+      - name: Publish lib-kfsm-v2 to Maven Central
+        if: steps.check-branch.outputs.tag_on_main == 'true' && steps.release-info.outputs.module == 'lib-kfsm-v2'
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
+          ORG_GRADLE_PROJECT_VERSION_NAME: ${{ steps.release-info.outputs.version }}
+        run: bin/gradle :lib-kfsm-v2:publishToMavenCentral
 
       - name: Build HTML
         if: steps.check-branch.outputs.tag_on_main == 'true' && steps.release-info.outputs.module == 'all'
