@@ -26,7 +26,6 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation(libs.arrow)
   implementation(libs.jooq)
-  implementation(libs.kfsm)
   implementation(libs.kotlinxSerializationCore)
   implementation(libs.quiver)
 
