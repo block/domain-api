@@ -3,6 +3,7 @@ arrow = "2.1.2"
 jooq = "3.20.5"
 junit = "[5.0,6.0)"
 kfsm = "0.11.0"
+kfsm2 = "2.0.0"
 kotest = "6.0.0.M10"
 # @pin
 kotlin = "2.1.20"
@@ -23,6 +24,7 @@ jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 kfsm = { module = "app.cash.kfsm:kfsm", version.ref = "kfsm" }
+kfsm2 = { module = "app.cash.kfsm:kfsm-v2", version.ref = "kfsm2" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestJunitRunnerJvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotestProperty = { module = "io.kotest:kotest-property", version.ref = "kotest" }

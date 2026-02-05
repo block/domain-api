@@ -4,8 +4,9 @@
 
 Domain-api uses automated publishing to Maven Central via GitHub Actions. The release process is triggered by creating a tag in semver format on the main branch:
 
-- **Full release** (both modules): Tag with `v*` (e.g., `v0.10.4`)
+- **Full release** (all modules): Tag with `v*` (e.g., `v0.10.4`)
 - **lib-kfsm only**: Tag with `lib-kfsm-v*` (e.g., `lib-kfsm-v0.10.5`)
+- **lib-kfsm-v2 only**: Tag with `lib-kfsm-v2-v*` (e.g., `lib-kfsm-v2-v2.0.0`)
 
 ## Prerequisites
 
@@ -84,6 +85,7 @@ Once the tag is pushed, the [Publish to Maven Central](https://github.com/block/
 1. Build the artifacts:
    - `xyz.block.domainapi:domain-api:$version`
    - `xyz.block.domainapi:domain-api-kfsm:$version`
+   - `xyz.block.domainapi:domain-api-kfsm-v2:$version`
 
 2. Sign the artifacts with GPG
 
@@ -106,11 +108,19 @@ The `lib-kfsm` module has its own version and depends on a specific published ve
 1. Update the KFSM version in `gradle/libs.versions.toml`
 
 2. Update `lib-kfsm/gradle.properties`:
-   - Ensure `domainApiVersion` points to the correct published version of `domain-api`
+
+    ```sh
+    export LIB_KFSM_VERSION=A.B.C
+    sed -i "" \
+      "s/VERSION_NAME=.*/VERSION_NAME=$LIB_KFSM_VERSION/g" \
+      lib-kfsm/gradle.properties
+    ```
+
+   Also ensure `domainApiVersion` points to the correct published version of `domain-api`.
 
 3. Update `CHANGELOG.md` with the KFSM update
 
-4. Create and push a tag with the `lib-kfsm-v` prefix:
+4. Commit and push the changes, then create and push a tag with the `lib-kfsm-v` prefix:
 
     ```sh
     export LIB_KFSM_VERSION=A.B.C
@@ -120,16 +130,44 @@ The `lib-kfsm` module has its own version and depends on a specific published ve
 
 This will publish only `xyz.block.domainapi:domain-api-kfsm:$version` to Maven Central (without regenerating docs).
 
-### Major KFSM Updates (e.g., v2)
+**Note**: The publish workflow validates that the tag version matches `VERSION_NAME` in `lib-kfsm/gradle.properties`. If they don't match, the workflow will fail.
 
-For backwards-incompatible KFSM updates, you can release a new major version of `lib-kfsm` independently:
+## Releasing lib-kfsm-v2 Only
 
-1. Update KFSM to the new major version in `gradle/libs.versions.toml`
-2. Make any required code changes in `lib-kfsm`
-3. Ensure `domainApiVersion` in `lib-kfsm/gradle.properties` points to a compatible published `domain-api` version
-4. Tag and release as `lib-kfsm-v2.0.0`
+For releasing the `lib-kfsm-v2` module independently (e.g., for KFSM 2.x compatibility updates):
 
-Users can then use `domain-api:1.x` with `domain-api-kfsm:2.x` as long as the core API is compatible.
+### Steps
+
+1. Update the `kfsm2` version in `gradle/libs.versions.toml` to the new KFSM version
+
+2. Make any required code changes in `lib-kfsm-v2`
+
+3. Update `lib-kfsm-v2/gradle.properties`:
+
+    ```sh
+    export LIB_KFSM_V2_VERSION=A.B.C
+    sed -i "" \
+      "s/VERSION_NAME=.*/VERSION_NAME=$LIB_KFSM_V2_VERSION/g" \
+      lib-kfsm-v2/gradle.properties
+    ```
+
+   Also ensure `domainApiVersion` points to a compatible published `domain-api` version.
+
+4. Update `CHANGELOG.md` with the changes
+
+5. Commit and push the changes, then create and push a tag with the `lib-kfsm-v2-v` prefix:
+
+    ```sh
+    export LIB_KFSM_V2_VERSION=A.B.C
+    git tag -a lib-kfsm-v2-v$LIB_KFSM_V2_VERSION -m "Release lib-kfsm-v2 version $LIB_KFSM_V2_VERSION"
+    git push origin lib-kfsm-v2-v$LIB_KFSM_V2_VERSION
+    ```
+
+**Note**: The publish workflow validates that the tag version matches `VERSION_NAME` in `lib-kfsm-v2/gradle.properties`. If they don't match, the workflow will fail.
+
+### Coexistence with lib-kfsm
+
+The `lib-kfsm-v2` module uses a different package namespace (`xyz.block.domainapi.kfsm.v2.util`) allowing both versions to coexist on the classpath. Users can use both `domain-api-kfsm:1.x` (with KFSM 1.x) and `domain-api-kfsm-v2:2.x` (with KFSM 2.x) in the same project.
 
 ### 4. Create GitHub Release
 
@@ -206,6 +244,16 @@ Each release includes:
   - POM file
 
 - **KFSM Utilities**: `xyz.block.domainapi:domain-api-kfsm:$version`
+  - Package: `xyz.block.domainapi.util`
+  - Main JAR with compiled classes
+  - Sources JAR
+  - Javadoc JAR
+  - POM file
+
+- **KFSM v2 Utilities**: `xyz.block.domainapi:domain-api-kfsm-v2:$version`
+  - Package: `xyz.block.domainapi.kfsm.v2.util`
+  - For KFSM 2.x compatibility
+  - Can coexist with `domain-api-kfsm` in the same project
   - Main JAR with compiled classes
   - Sources JAR
   - Javadoc JAR
