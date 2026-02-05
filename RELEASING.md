@@ -105,25 +105,61 @@ The `lib-kfsm` module has its own version and depends on a specific published ve
 
 ### Steps
 
-1. Update the KFSM version in `gradle/libs.versions.toml`
+### 1. Prepare the Release
 
-2. Update `lib-kfsm/gradle.properties`:
+1. Set the release version:
 
     ```sh
     export LIB_KFSM_VERSION=A.B.C
+    ```
+2. Create a release branch:
+
+    ```sh
+    git checkout -b release/kfsm-$LIB_KFSM_VERSION
+    ```
+
+3. Update `CHANGELOG.md` with changes since the last release.
+
+4. Update `lib-kfsm/gradle.properties`:
+
+   ```sh
     sed -i "" \
       "s/VERSION_NAME=.*/VERSION_NAME=$LIB_KFSM_VERSION/g" \
       lib-kfsm/gradle.properties
     ```
 
-   Also ensure `domainApiVersion` points to the correct published version of `domain-api`.
+   Also ensure `domainApiVersion` points to a compatible published `domain-api` version.
 
-3. Update `CHANGELOG.md` with the KFSM update
-
-4. Commit and push the changes, then create and push a tag with the `lib-kfsm-v` prefix:
+5. Commit and push the release branch:
 
     ```sh
-    export LIB_KFSM_VERSION=A.B.C
+    git add .
+    git commit -m "Prepare for release kfsm-$LIB_KFSM_VERSION"
+    git push origin release/kfsm-$LIB_KFSM_VERSION
+    ```
+
+6. Create a pull request to merge the release branch into main:
+
+    ```sh
+    gh pr create --title "Release kfsm-$LIB_KFSM_VERSION" --body "Release version kfsm-$LIB_KFSM_VERSION"
+    ```
+
+7. Review and merge the pull request to main
+
+### 2. Create and Push the Release Tag
+
+Once the release PR is merged to main:
+
+1. Pull the latest changes from main:
+
+    ```sh
+    git checkout main
+    git pull origin main
+    ```
+
+2. Create a tag in semver format (must start with "v"):
+
+    ```sh
     git tag -a lib-kfsm-v$LIB_KFSM_VERSION -m "Release lib-kfsm version $LIB_KFSM_VERSION"
     git push origin lib-kfsm-v$LIB_KFSM_VERSION
     ```
@@ -138,14 +174,24 @@ For releasing the `lib-kfsm-v2` module independently (e.g., for KFSM 2.x compati
 
 ### Steps
 
-1. Update the `kfsm2` version in `gradle/libs.versions.toml` to the new KFSM version
+### 1. Prepare the Release
 
-2. Make any required code changes in `lib-kfsm-v2`
-
-3. Update `lib-kfsm-v2/gradle.properties`:
+1. Set the release version:
 
     ```sh
     export LIB_KFSM_V2_VERSION=A.B.C
+    ```
+2. Create a release branch:
+
+    ```sh
+    git checkout -b release/kfsm-v2-$LIB_KFSM_V2_VERSION
+    ```
+
+3. Update `CHANGELOG.md` with changes since the last release.
+
+4. Update `lib-kfsm-v2/gradle.properties`:
+
+   ```sh
     sed -i "" \
       "s/VERSION_NAME=.*/VERSION_NAME=$LIB_KFSM_V2_VERSION/g" \
       lib-kfsm-v2/gradle.properties
@@ -153,12 +199,36 @@ For releasing the `lib-kfsm-v2` module independently (e.g., for KFSM 2.x compati
 
    Also ensure `domainApiVersion` points to a compatible published `domain-api` version.
 
-4. Update `CHANGELOG.md` with the changes
-
-5. Commit and push the changes, then create and push a tag with the `lib-kfsm-v2-v` prefix:
+5. Commit and push the release branch:
 
     ```sh
-    export LIB_KFSM_V2_VERSION=A.B.C
+    git add .
+    git commit -m "Prepare for release kfsm-v2-$LIB_KFSM_V2_VERSION"
+    git push origin release/kfsm-v2-$LIB_KFSM_V2_VERSION
+    ```
+
+6. Create a pull request to merge the release branch into main:
+
+    ```sh
+    gh pr create --title "Release kfsm-v2-$LIB_KFSM_V2_VERSION" --body "Release version kfsm-v2-$LIB_KFSM_V2_VERSION"
+    ```
+
+7. Review and merge the pull request to main
+
+### 2. Create and Push the Release Tag
+
+Once the release PR is merged to main:
+
+1. Pull the latest changes from main:
+
+    ```sh
+    git checkout main
+    git pull origin main
+    ```
+
+2. Create a tag in semver format (must start with "v"):
+
+    ```sh
     git tag -a lib-kfsm-v2-v$LIB_KFSM_V2_VERSION -m "Release lib-kfsm-v2 version $LIB_KFSM_V2_VERSION"
     git push origin lib-kfsm-v2-v$LIB_KFSM_V2_VERSION
     ```

@@ -1,5 +1,9 @@
 # Change Log
 
+## [lib-kfsm-v2-v0.1.0] 
+
+* Initial release of KFSM version 2 utilities.
+
 ## [0.5.3]
 
 * Yet another minor bug fix in publish action.
