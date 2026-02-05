@@ -1,7 +1,7 @@
 plugins {
   id("java-library")
-  id("org.jetbrains.kotlin.jvm")
-  id("com.vanniktech.maven.publish") version "0.34.0"
+  alias(libs.plugins.kotlinGradlePlugin)
+  alias(libs.plugins.mavenPublish)
 }
 
 repositories {
