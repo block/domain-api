@@ -58,7 +58,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ steps.release-info.outputs.version }}
-        run: bin/gradle publishToMavenCentral
+        run: bin/gradle :lib:publishToMavenCentral :lib-kfsm:publishToMavenCentral
 
       - name: Publish lib-kfsm to Maven Central
         if: steps.check-branch.outputs.tag_on_main == 'true' && steps.release-info.outputs.module == 'lib-kfsm'
