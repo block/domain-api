@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.5.1]
+
+* Minor bug fix in publish action.
+
 ## [0.5.0]
 
 * Split KFSM utilities into separate module.
