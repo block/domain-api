@@ -14,3 +14,4 @@ docker-sources/
 /.hermit
 local.properties
 .goose/memory
+.secrets
